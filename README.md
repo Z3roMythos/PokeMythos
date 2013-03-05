@@ -1,4 +1,4 @@
 PokeMythos
 ==========
 
-Engine de Pokémon em SDL e C++
+Engine de Pokémon em SDL e C
