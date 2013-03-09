@@ -1,5 +1,8 @@
+
+// Bibliotecas
 #include <stdio.h>
 #include "SDL/SDL.h"
+#include "SDL/SDL_image.h"
 #include <string>
 
 // Resolução da Tela
@@ -13,6 +16,10 @@ SDL_Surface* bg = NULL;
 SDL_Surface* tela = NULL;
 
 
+// A estrutura de evento que vai ser usada
+SDL_Event evento;
+
+
 SDL_Surface *load_image( std::string filename )
 {
     // Surface temporaria, que carrega a imagem
@@ -21,8 +28,8 @@ SDL_Surface *load_image( std::string filename )
     // Surface melhorada que vai ser utilizada
     SDL_Surface* optImagem = NULL;
 
-    //Carregar a Imagem
-    loadedImage = SDL_LoadBMP( filename.c_str() );
+    // Agora ele vai carregar PNG
+    loadedImage = IMG_Load( filename.c_str() );
 
     if( loadedImage != NULL)
     {
@@ -55,32 +62,80 @@ void apply_surface( int x, int y, SDL_Surface* source, SDL_Surface* destino)
 }
 
 
-int main( int argc, char* args[] )
+bool init()
 {
-
-  // Inicializa o SDL
+    // Inicializa o SDL
   if( SDL_Init( SDL_INIT_EVERYTHING ) == -1 )
   {
 
-      return 1;
+      return false;
   }
 
-  // Inicia Vídeo
+ // Inicia Vídeo
   tela = SDL_SetVideoMode( SCREEN_LARGURA, SCREEN_ALTURA, SCREEN_BPP, SDL_SWSURFACE);
 
   // Se houver algum erro na configuração da tela
   if( tela == NULL )
   {
 
-   return 1;
+   return false;
   }
 
   // Nome da Form
   SDL_WM_SetCaption("Pokémon Engine", NULL);
 
+  // Se tudo ocorrer bem
+  return true;
+
+}
+
+bool load_Files()
+{
+
+
   // Carregar Imagens
-  mensagem = load_image( "hello.bmp" );
-  bg = load_image( "cb.bmp" );
+  bg = load_image( "teste.png" );
+
+
+  // Se der algum erro ao carregar a imagem
+  if( bg == NULL )
+  {
+      return false;
+  }
+
+  // Caso a imagem carregar
+  return true;
+
+}
+
+void clean_up()
+{
+    // Remove a imagem
+    SDL_FreeSurface( bg );
+
+
+    // Fechar o SDL
+    SDL_Quit();
+
+}
+
+int main( int argc, char* args[] )
+{
+
+   bool sair = false;
+
+   // Inicialização
+   if( init() == false)
+   {
+       return 1;
+   }
+
+   // Carregar Arquivos
+   if( load_Files() == false )
+   {
+       return 1;
+   }
+
 
   // Desenha BG na tela
   apply_surface( 0, 0, bg, tela);
@@ -91,8 +146,21 @@ int main( int argc, char* args[] )
       return 1;
   }
 
-  // Aguardar 2 segundos
-  SDL_Delay( 2000 );
+  // While
+  while( sair == false )
+  {
+      while( SDL_PollEvent( &evento ))
+      {
+
+          if(evento.type == SDL_QUIT )
+          {
+              sair = true;
+          }
+      }
+
+  }
+
+    clean_up();
 
 return 0;
 }
